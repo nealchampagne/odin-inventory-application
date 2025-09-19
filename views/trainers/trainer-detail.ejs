@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= trainer.name %> - Trainer Detail</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+<main id="trainerPageContent">
+  <a href="/">← All Trainers</a>
+  <h1><%= trainer.name %></h1>
+  <h3>Age: <%= trainer.age %></h3>
+  <h3>Pronouns: <% if (trainer.gender === 'M') { %> He/Him
+    <% } else if (trainer.gender === 'F') {%> She/Her
+    <% } else { %> They/Them
+    <% } %>
+  </h3>
+  <h3>Bio: <%= trainer.bio %></h3>
+
+  <h2><%= trainer.name %>'s Team:</h2>
+
+  <div class="trainer-team-grid" id="trainer-grid" data-trainer-id="<%= trainer.id %>">
+    <% team.forEach((mon, i) => { %>
+      <% const slotIndex = i + 1; %>
+      <div class="slot-card <%= mon ? 'filled' : 'empty' %>"
+          data-slot="<%= slotIndex %>"
+          <% if (mon) { %>
+            data-species-id="<%= mon.species_id %>"
+            <%= mon.form_id ? `data-form-id="${mon.form_id}"` : '' %>
+            data-nickname="<%= mon.nickname || '' %>"
+            data-level="<%= mon.level || '' %>"
+            data-gender="<%= mon.gender || '' %>"
+            data-nature-id="<%= mon.nature_id || '' %>"
+            data-nature-name="<%= mon.nature_name || '' %>"
+            data-image-url="<%= mon.image_url %>"
+            data-species-name="<%= mon.name %>"
+            data-form-name="<%= mon.form_name || '' %>"
+            data-type1-name="<%= mon.type_1_name %>"
+            data-type2-name="<%= mon.type_2_name || '' %>"
+          <% } %>>
+        <% if (mon) { %>
+          <img src="<%= mon.image_<div class="trainer-team-grid" id="trainer-grid" data-trainer-id="<%= trainer.id %>">
+    <% team.forEach((mon, i) => { %>
+      <% const slotIndex = i + 1; %>
+      <div class="slot-card <%= mon ? 'filled' : 'empty' %>"
+          data-slot="<%= slotIndex %>"
+          <% if (mon) { %>
+            data-species-id="<%= mon.species_id %>"
+            <%= mon.form_id ? `data-form-id="${mon.form_id}"` : '' %>
+            data-nickname="<%= mon.nickname || '' %>"
+            data-level="<%= mon.level || '' %>"
+            data-gender="<%= mon.gender || '' %>"
+            data-nature-id="<%= mon.nature_id || '' %>"
+            data-nature-name="<%= mon.nature_name || '' %>"
+            data-image-url="<%= mon.image_url %>"
+            data-species-name="<%= mon.name %>"
+            data-form-name="<%= mon.form_name || '' %>"
+            data-type1-name="<%= mon.type_1_name %>"
+            data-type2-name="<%= mon.type_2_name || '' %>"
+          <% } %>>
+        <% if (mon) { %>
+          <img src="<%= mon.image_url %>"
+              alt="<% if (mon.nickname && mon.nickname.trim()) { %>
+                  <%= `"${mon.nickname}"` %>
+                <% } else { %>
+                  <%= capFirst(mon.name) %>
+                <% } %>">
+          <div class="pokemon-name">
+            <% if (mon.nickname) { %>
+              "<%= mon.nickname %>"
+            <% } else { %>
+              <%= capFirst(mon.name) %>
+            <% } %>
+          </div>
+          <div class="pokemon-level-gender">
+            Lv <%= mon.level %>
+            <span class="gender-icon"><% if (mon.gender === 'male') {%> 
+              ♂ <% } else if (mon.gender === 'female') {%>
+                ♀ <% } %></span>
+          </div>
+          <div class="type-badges">
+            <div class="type-bubble <%= mon.type_1_name %>">
+              <img class="type-icon"
+                src="/images/types/<%= mon.type_1_name%>.svg"
+                alt="<%= mon.type_1_name %> type" />
+            </div>
+            <% if (mon.type_2_name) { %>
+              <div class="type-bubble <%= mon.type_2_name %>">
+                <img class="type-icon"
+                  src="/images/types/<%= mon.type_2_name%>.svg"
+                  alt="<%= mon.type_2_name %> type" />
+              </div>
+            <% } %>
+          </div>
+        <% } else { %>
+          <div class="empty-slot">+</div>
+        <% } %>
+        </div>
+    <% }) %>
+  </div>
+  <div class="button-container">
+    <a href="/trainer/<%= trainer.id %>/edit" class="edit-btn">
+      Edit Trainer
+    </a>
+    <form action="/trainer/<%= trainer.id %>?_method=DELETE" method="POST" style="display:inline;">
+      <button class="delete-btn" type="submit" onclick="return confirm('Delete this trainer?')">
+        Delete Trainer
+      </button>
+    </form>
+  </div>
+</main>
+
+<%- include('../partials/_pokemon-creation-modal', { types, natures, trainer, speciesResults }) %>
+<%- include('../partials/_view-pokemon-modal') %>
+
+<script src="/js/modals/view-pokemon-modal.js"></script>
+<script src="/js/modals/pokemon-creation-modal.js"></script>
+<script src="/js/utils/strings.js"></script>
+<script src="/js/trainer-detail.js"></script>
+</body>
+</html>

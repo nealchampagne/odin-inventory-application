@@ -4,27 +4,33 @@ const path = require('path');
 require('dotenv').config();
 const methodOverride = require('method-override');
 const fs = require('node:fs');
+const { capFirst } = require('./utils/strings');
+app.locals.capFirst = capFirst;
+
+// Middleware to parse JSON bodies
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // Middleware to override HTTP methods
-app.use(methodOverride('_method'));
-
-const indexRouter = require('./routes/index');
-
-// use ejs view engine
-app.set('views', path.resolve('views'));
-app.set('view engine', 'ejs');
-
+app.use(methodOverride(function (req, res) {
+  if (req.body && typeof req.body === 'object' && '_method' in req.body) {
+    return req.body._method;
+  }
+  if (req.query && '_method' in req.query) {
+    return req.query._method;
+  }
+}));
 
 // Middleware to serve static files
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Middleware to parse JSON bodies
-app.use(express.json());
-
-app.use(express.urlencoded({ extended: true }));
+// use ejs view engine
+app.set('views', path.resolve('views/trainers'));
+app.set('view engine', 'ejs');
 
 // Routes
-app.use('/', indexRouter);
+const trainerRouter = require('./routes/trainers');
+app.use('/', trainerRouter);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
@@ -33,7 +39,6 @@ app.use((err, req, res, next) => {
 })
 
 const PORT = process.env.PORT || 3000;
-
 app.listen(PORT, () => {
   console.log(`TOP Inventory Application - listening on port ${PORT}!`);
 });

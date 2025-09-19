@@ -1,0 +1,36 @@
+
+<div id="viewPokemonModal" class="modal" aria-hidden="true">
+  <div class="modal-content">
+    <button type="button" class="modal-close" aria-label="Close">&times;</button>
+
+    <div class="modal-body">
+      <div class="details-header">
+        <img id="details-sprite" src="" alt="" class="details-sprite">
+        <h2 class="details-name"></h2>
+      </div>
+      <div class="details-types">
+        <div class="type-bubble">
+          <img id="details-type1" class="type-icon" src="" alt="">
+        </div>
+        <div class="type-bubble">
+          <img id="details-type2" class="type-icon" src="" alt="">
+        </div>
+      </div>
+
+      <ul class="details-list">
+        <li><strong>Nickname:</strong> <span class="details-nickname"></span></li>
+        <li><strong>Level:</strong>   <span class="details-level"></span></li>
+        <li><strong>Gender:</strong>  <span class="details-gender"></span></li>
+        <li><strong>Nature:</strong>  <span class="details-nature"></span></li>
+      </ul>
+
+      <div class="modal-actions">
+        <button type="button" id="editPokemonBtn">Edit</button>
+        <form id="deletePokemonForm" method="POST" style="display:none;">
+          <input type="hidden" name="_method" value="DELETE">
+        </form>
+        <button id="deletePokemonBtn" class="delete-btn">Delete</button>
+      </div>
+    </div>
+  </div>
+</div>

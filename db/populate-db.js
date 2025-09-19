@@ -28,38 +28,21 @@ const types = [
   'rock', 'ghost', 'dragon', 'dark', 'steel', 'fairy'
 ];
 
+const skipStrings = [
+  'pikachu-', // cosmetic Pikachu forms
+  '-starter',  // special starter forms
+  '-totem',    // Alolan totem forms
+  'koraidon-', // special legendary forms
+  'miraidon-',
+  '-power-construct', // special zygarde forms
+  '-meteor',          // special minior form
+  '-eternamax',       // special gigantamax form
+  '-dada',         // special zarude form
+];
+
 const ROMAN_MAP = {
   i: 1, ii: 2, iii: 3, iv: 4, v: 5,
   vi: 6, vii: 7, viii: 8, ix: 9, x: 10
-};
-
-const extractChainId = url => {
-  const match = url.match(/\/evolution-chain\/(\d+)\//);
-  return match ? parseInt(match[1], 10) : null;
-};
-
-const getSpeciesNamesFromChain = chain => {
-  const names = [];
-
-  const traverse = node => {
-    names.push(node.species.name);
-    node.evolves_to.forEach(traverse);
-  };
-
-  traverse(chain.chain);
-  return names;
-};
-
-const resolveEvolutionFamilyName = (chain, knownSpecies) => {
-  const names = getSpeciesNamesFromChain(chain);
-
-  // Use known species if it's in the chain
-  if (names.includes(knownSpecies.name) && !knownSpecies.is_baby) {
-    return knownSpecies.name;
-  }
-
-  // Otherwise, fallback to first name in chain
-  return names[0];
 };
 
 const parseGenerationSlug = slug => {
@@ -74,28 +57,21 @@ const parseGenerationSlug = slug => {
   return value;
 };
 
-const populateOnePokemon = async speciesData => {
+const populateOnePokemon = async (name, speciesData) => {
   try {
 
     const generationInt = parseGenerationSlug(speciesData.generation.name);
     const defaultForm = speciesData.varieties.find(v => v.is_default);
     const formData = await P.getPokemonByName(defaultForm.pokemon.name);
 
-    const chainId = extractChainId(speciesData.evolution_chain.url);
-    const chain = await P.getEvolutionChainById(chainId);
-    const familyName = resolveEvolutionFamilyName(chain, speciesData);
-    
-    const imageUrl = formData.sprites.other['official-artwork'].front_default;
+    const imageUrl = formData.sprites.front_default;
     const types = formData.types.map(t => t.type.name);
 
-    const evolutionFamilyId = await db.insertEvolutionFamily(chainId, familyName);
-
     const speciesId = await db.insertPokemonSpecies({
-      id: speciesData.id,
-      name: speciesData.name,
+      id: formData.id,
+      name: formData.name,
       type1Id: await db.getTypeId(types[0]),
       type2Id: types[1] ? await db.getTypeId(types[1]) : null,
-      evolutionFamilyId,
       generation: generationInt,
       imageUrl
     });
@@ -115,7 +91,7 @@ const populateAllPokemon = async () => {
 
     try {
       const speciesData = await P.getPokemonSpeciesByName(name);
-      const speciesId = await populateOnePokemon(speciesData);
+      const speciesId = await populateOnePokemon(name, speciesData);
       console.log(speciesId);
       if (speciesId) {
         await populateForms(speciesId, speciesData.varieties);
@@ -145,9 +121,23 @@ const populateForms = async (speciesId, varieties) => {
         continue;
       }
 
+      const shouldSkip = skipStrings.some(str => formData.name.includes(str));
+      
+      if (shouldSkip) {
+        console.log(`🚫 Skipping special form: ${formData.name}`);
+        continue;
+      }
+
       const types = formData.types.map(t => t.type.name);
       const type1Id = await db.getTypeId(types[0]);
       const type2Id = types[1] ? await db.getTypeId(types[1]) : null;
+      let imageUrl = formData.sprites.front_default;
+
+      // Minimal, targeted fix for Zygarde 10% missing sprite
+      if (!imageUrl && formData.name === 'zygarde-10') {
+        const proxyData = await P.getPokemonFormByName('zygarde-10-power-construct');
+        imageUrl = proxyData.sprites.front_default;
+      }
 
       console.log(`🔍 Inserting non-default form: ${formData.name}, Types: ${types.join(', ')}`);
 
@@ -156,7 +146,7 @@ const populateForms = async (speciesId, varieties) => {
         formName: formData.name,
         type1Id,
         type2Id,
-        imageUrl: formData.sprites.front_default
+        imageUrl,
       });
     } catch (err) {
       console.error(`❌ Error populating form ${variety.pokemon.name}:`, err);
@@ -201,4 +191,3 @@ const populateDb = async () => {
 };
 
 populateDb();
-
