@@ -3,25 +3,40 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Create New Trainer</title>
-  <link rel="stylesheet" href="/styles.css" />
+  <title><%= title %></title>
+  <link rel="stylesheet" href="/css/styles.css" />
 </head>
 <body>
-  <h1>Create New Trainer</h1>
-  <form action="<%= formAction %>" method="POST" id="trainerForm">
-    <label for="name">Name:</label>
-    <input type="text" id="name" name="name" value="<%= trainer.name || '' %>" required />
-    <label for="age">Age:</label>
-    <input type="number" id="age" name="age" value="<%= trainer.age || '' %>" min="1" required />
-    <label for="gender">Gender:</label>
-    <select name="gender" id="gender">
-      <option value="M" <%= trainer.gender === 'M' ? 'selected' : '' %>>Male</option>
-      <option value="F" <%= trainer.gender === 'F' ? 'selected' : '' %>>Female</option>
-      <option value="N" <%= trainer.gender === 'N' ? 'selected' : '' %>>Nonbinary</option>
-    </select>
-    <label for="bio">Bio:</label>
-    <textarea id="bio" name="bio" rows="4"><%= trainer.bio || '' %></textarea>
-    <button type="submit"><%= submitLabel %></button>
-  </form>
+  <%- include('../partials/_header') %>
+  <main id="trainer-form-main">
+    <div class="trainer-form-container">
+      <a <% if (isEdit) { %> href="/trainer/<%= trainer.id %>" <% } else { %> href="/" <% } %> class="back-btn">< Back</a>
+      <h1><%= title %></h1>
+      <form action="<%= formAction %>" method="POST" id="trainerForm">
+        <div class="input-container">
+          <label for="name">Name:</label>
+          <input type="text" id="name" name="name" value="<%= trainer.name || '' %>" required />
+        </div>
+        <div class="input-container">
+          <label for="age">Age:</label>
+          <input type="number" id="age" name="age" value="<%= trainer.age || '' %>" min="1" required />
+        </div>
+        <div class="input-container">
+          <label for="gender">Gender:</label>
+          <select name="gender" id="gender">
+            <option value="M" <%= trainer.gender === 'M' ? 'selected' : '' %>>Male</option>
+            <option value="F" <%= trainer.gender === 'F' ? 'selected' : '' %>>Female</option>
+            <option value="N" <%= trainer.gender === 'N' ? 'selected' : '' %>>Nonbinary</option>
+          </select>
+        </div>
+        <div class="input-container">
+          <label for="bio">Bio:</label>
+          <textarea id="bio" name="bio" rows="4"><%= trainer.bio || '' %></textarea>
+        </div>
+        <button class="submit-btn" type="submit"><%= submitLabel %></button>
+      </form>
+    </div>
+  </main>
+  <%- include('../partials/_footer') %>
 </body>
 </html>

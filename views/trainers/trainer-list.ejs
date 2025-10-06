@@ -7,33 +7,37 @@
     <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
-<main id="trainerListPageContent">
-  <h1>Pokémon Trainers</h1>
-  <a href="/trainer/new" class="new-trainer-btn">New Trainer</a>
+  <%- include('../partials/_header') %>
+  <main id="trainer-list-main">
+    <div class="trainer-list-container">
+      <h1>Pokémon Trainers</h1>
+      <a href="/trainer/new" class="new-trainer-btn">New Trainer</a>
 
-  <% if (!hasTrainers) { %>
-    <p>No trainers present.</p>
-  <% } else { %>
-    <ul class="trainer-preview-list">
-      <% trainers.forEach(trainer => { %>
-        <li>
-          <a href="/trainer/<%= trainer.id %>" class="trainer-card">
-            <h2><%= trainer.name %>:</h2>
-            <div class="team-sprites">
-              <% trainer.team.forEach(pokemon => { %>
-                <div class="sprite-wrapper">
-                  <img src="<%= pokemon.image_url %>" alt="sprite" class="preview-sprite">
-                  <div class="level">Lv <%= pokemon.level %><span class="gender-icon"><% if (pokemon.gender === 'male') {%>
-                    ♂ <% } else if (pokemon.gender === 'female') {%>
-                    ♀ <% } %></span></div>
+      <% if (!hasTrainers) { %>
+        <p>No trainers present.</p>
+      <% } else { %>
+        <ul class="trainer-preview-list">
+          <% trainers.forEach(trainer => { %>
+            <li>
+              <a href="/trainer/<%= trainer.id %>" class="trainer-card">
+                <h2><%= trainer.name %>:</h2>
+                <div class="team-sprites">
+                  <% trainer.team.forEach(pokemon => { %>
+                    <div class="sprite-wrapper">
+                      <img src="<%= pokemon.image_url %>" alt="sprite" class="preview-sprite">
+                      <div class="level">Lv <%= pokemon.level %><span class="gender-icon"><% if (pokemon.gender === 'male') {%>
+                        ♂ <% } else if (pokemon.gender === 'female') {%>
+                        ♀ <% } %></span></div>
+                    </div>
+                  <% }) %>
                 </div>
-              <% }) %>
-            </div>
-          </a>
-        </li>
-      <% }) %>
-    </ul>
-  <% } %>
-</main>
+              </a>
+            </li>
+          <% }) %>
+        </ul>
+      <% } %>
+    </div>
+  </main>
+  <%- include('../partials/_footer') %>
 </body>
 </html>
