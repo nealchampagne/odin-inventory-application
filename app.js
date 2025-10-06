@@ -40,13 +40,12 @@ app.post('/admin/seed-db', async (req, res) => {
     return res.status(403).send('Forbidden');
   }
 
-  try {
-    await populateDb({ force: true });
-    res.send('✅ Database seeded successfully');
-  } catch (err) {
-    console.error('❌ Seeding error:', err);
-    res.status(500).send('Seeding failed');
-  }
+  res.send('🧪 Seeding started in background');
+
+  // Run seeding without blocking response
+  populateDb({ force: true }).catch(err => {
+    console.error('❌ Seeding failed:', err);
+  });
 });
 
 // Routes
