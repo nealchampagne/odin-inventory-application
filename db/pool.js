@@ -15,7 +15,8 @@ const pool = new Pool({
   password: process.env.DB_PASSWORD,
   port: process.env.DB_PORT,
   ssl: { 
-    rejectUnauthorized: false 
+    rejectUnauthorized: true,
+    ca: process.env.CA_CERT 
   }, // Adjust based on your environment
 });
 
