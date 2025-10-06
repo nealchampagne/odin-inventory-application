@@ -9,6 +9,7 @@
 
     <!-- Modal Header with Step Indicator -->
     <div class="modal-header">
+      <span class="modal-title">Add Pokémon to <%= trainer.name %>'s Team</span>
       <span class="step-indicator" id="modalStepIndicator">Step 1 of 2</span>
       <span class="close-btn" id="closeModalBtn" aria-label="Close">&times;</span>
     </div>
@@ -18,24 +19,33 @@
       <form id="speciesFilterForm" method="GET" action="javascript:void(0)">
         <input type="hidden" name="trainerId" value="<%= trainer.id %>" />
 
-        <label>Types:</label>
-        <select multiple name="types">
-          <% types.forEach(type => { %>
-            <option value="<%= type.id %>"><%= capFirst(type.name) %></option>
-          <% }) %>
-        </select>
+        <div>
+          <p class="filter-label">Types:</p>
+          <fieldset id="type-filter">
+            <div class="scroll-wrapper">
+              <% types.forEach(type => { %>
+                <input type="checkbox" name="types" class="type-box" value="<%= type.id %>"><%= capFirst(type.name) %></input><br>
+              <% }) %>
+            </div>
+          </fieldset>
+        </div>
 
-        <label>Generations:</label>
-        <select multiple name="generations">
-          <% for (let i = 1; i < 10; i++) { %>
-            <option value="<%= i %>">Gen <%= i %></option>
-          <% }; %>
-        </select>
+        <div>
+          <p class="filter-label">Generations:</p>
+          <fieldset id="generation-filter">
+            <div class="scroll-wrapper">
+              <% for (let i = 1; i < 10; i++) { %>
+                <input type="checkbox" name="generations" value="<%= i %>">Gen <%= i %></input><br>
+              <% }; %>
+            </div>
+          </fieldset>
+        </div>
 
-        <label>Name:</label>
-        <input type="text" name="name" />
-
-        <button type="submit">Apply Filters</button>
+        <div>
+          <p class="filter-label">Name:</p>
+          <input type="text" id="name" name="name" />
+        </div>
+          <button class="filter-btn" type="submit">Apply Filters</button>
       </form>
 
       <div id="speciesResults">
@@ -62,33 +72,49 @@
     <div class="modal-step" data-step="details" hidden>
       <div class="details-header">
         <img id="details-sprite" src="" alt="" class="details-sprite">
+        <div class="details-types">
+          <div class="type-bubble">
+            <img id="details-type1" class="type-icon" src="" alt="">
+          </div>
+          <div class="type-bubble">
+            <img id="details-type2" class="type-icon" src="" alt="">
+          </div>
+        </div>        
         <h2 id="details-name"></h2>
       </div>
 
       <form id="pokemonDetailsForm" method="POST" action="javascript:void(0)">
-        <label>Nickname:</label>
-        <input type="text" name="nickname" maxlength="12" />
+        <div class="input-container">
+          <label>Nickname:</label>
+          <input type="text" name="nickname" maxlength="12" />
+        </div>
 
-        <label>Level:</label>
-        <input type="number" name="level" min="1" max="100" />
+        <div class="input-container">
+          <label>Level:</label>
+          <input type="number" name="level" min="1" max="100" required/>
+        </div>
 
-        <label>Gender:</label>
-        <select name="gender">
-          <option value="none">—</option>
-          <option value="male">Male</option>
-          <option value="female">Female</option>
-        </select>
+        <div class="input-container">
+          <label>Gender:</label>
+          <select name="gender">
+            <option value="none">—</option>
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+          </select>
+        </div>
 
-        <label>Nature:</label>
-        <select name="nature">
-          <% natures.forEach(nature => { %>
-            <option value="<%= nature.id %>"><%= capFirst(nature.name) %></option>
-          <% }) %>
-        </select>
+        <div class="input-container">
+          <label>Nature:</label>
+          <select name="nature" required>
+            <% natures.forEach(nature => { %>
+              <option value="<%= nature.id %>"><%= capFirst(nature.name) %></option>
+            <% }) %>
+          </select>
+        </div>
 
         <div class="modal-actions">
-          <button type="button" id="detailsBackBtn">← Back</button>
-          <button type="submit">Save Pokémon</button>
+          <button class="back-btn" type="button" id="detailsBackBtn">< Back</button>
+          <button class="submit-btn" type="submit">Save Pokémon</button>
         </div>
       </form>
     </div>
