@@ -1,18 +1,6 @@
 const Pokedex = require('pokeapi-js-wrapper');
 const db = require('./queries');
 const P = new Pokedex.Pokedex({ cache: false });
-const readline = require('readline');
-
-const confirmTruncate = async () => {
-  const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
-
-  return new Promise(resolve => {
-    rl.question('⚠️ This will erase all data. Continue? (y/n) ', answer => {
-      rl.close();
-      resolve(answer.trim().toLowerCase() === 'y');
-    });
-  });
-};
 
 const natureNames = [
   'adamant', 'bashful', 'bold', 'brave', 'calm',
@@ -177,11 +165,11 @@ const populateDb = async () => {
   console.time('Total population time');
   await db.createTables();
 
-  const confirmed = await confirmTruncate();
-  if (!confirmed) {
-    console.log('❌ population aborted.');
+  if (!force) {
+    console.log('❌ population aborted. Use { force: true } to wipe and seed.');
     return;
-  };
+  }
+
   console.log('🗑️  Truncating tables...');
   await db.truncateTables();
   await populateTypes();
@@ -190,4 +178,4 @@ const populateDb = async () => {
   console.timeEnd('Total population time');
 };
 
-populateDb();
+module.exports = populateDb;
