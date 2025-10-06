@@ -52,9 +52,11 @@ const getTrainerDetailView = async (req, res) => {
 // GET /new → form to create trainer
 const getNewTrainerForm = (req, res) => {
   res.render('trainer-form', {
+    title: 'Create New Trainer',
     trainer: {},
     formAction: '/trainer/new',
-    submitLabel: 'Create Trainer'
+    submitLabel: 'Create Trainer',
+    isEdit: false,
   });
 };
 
@@ -70,6 +72,7 @@ const postNewTrainer = async (req, res) => {
   };
 };
 
+// GET /trainer/:id/edit → form to edit trainer
 const getEditTrainerForm = async (req, res) => {
   const trainerId = req.params.id;
   if (!isUUID(trainerId)) {
@@ -81,9 +84,11 @@ const getEditTrainerForm = async (req, res) => {
       return res.status(404).send('Trainer not found');
     }
     res.render('trainer-form', { 
+      title: `Edit Trainer`,
       trainer,
       formAction: `/trainer/${trainer.id}?_method=PUT`, 
-      submitLabel: 'Update Trainer'
+      submitLabel: 'Update Trainer',
+      isEdit: true,
     });
   } catch (err) {
     console.error('Error loading edit form:', err);
@@ -91,6 +96,7 @@ const getEditTrainerForm = async (req, res) => {
   }
 };
 
+// PUT /trainer/:id → update trainer
 const handleUpdateTrainer = async (req, res) => {
   const trainerId = req.params.id;
   if (!isUUID(trainerId)) {
@@ -106,57 +112,7 @@ const handleUpdateTrainer = async (req, res) => {
   }
 };
 
-const getFilteredSpeciesFromCache = async (req, res) => {
-  const { typeIds = [], generationInts = [], name = '' } = req.query;
-
-  const allSpecies = await getCachedSpecies(); // cached
-
-  const filtered = allSpecies.filter(species => {
-    const matchesType =
-      typeIds.length === 0 ||
-      typeIds.includes(String(species.type1_id)) ||
-      (species.type_2_id && typeIds.includes(String(species.type_2_id)));
-
-    const matchesGen =
-      generationInts.length === 0 ||
-      generationInts.includes(String(species.generation));
-
-    const matchesName =
-      name.trim() === '' ||
-      species.name.toLowerCase().includes(name.toLowerCase());
-
-    return matchesType && matchesGen && matchesName;
-  });
-
-  res.json(filtered);
-};
-
-const getSpeciesFilterResults = async (req, res) => {
-  const { id } = req.params;
-  const { types = [], generations = [], name = '' } = req.query;
-
-  const allSpecies = await getCachedSpecies();
-
-  const filtered = allSpecies.filter(species => {
-    const matchesType =
-      types.length === 0 ||
-      types.includes(String(species.type_1_id)) ||
-      (species.type_2_id && types.includes(String(species.type_2_id)));
-
-    const matchesGen =
-      generations.length === 0 ||
-      generations.includes(String(species.generation));
-
-    const matchesName =
-      name.trim() === '' ||
-      species.name.toLowerCase().includes(name.toLowerCase());
-
-    return matchesType && matchesGen && matchesName;
-  });
-
-  res.json(filtered);
-};
-
+// POST /trainer/:id/team/:slot → add or update Pokémon in a slot
 const upsertTrainerPokemon = async (req, res) => {
   const trainerId = req.params.id;                  // or req.params.trainerId if your route uses that
   const slot      = Number(req.params.slot);
@@ -196,6 +152,7 @@ const upsertTrainerPokemon = async (req, res) => {
   }
 };
 
+// DELETE /trainer/:id → delete trainer
 const deleteTrainer = async (req, res) => {
   const trainerId = req.params.id;
 
@@ -212,6 +169,7 @@ const deleteTrainer = async (req, res) => {
   }
 };
 
+// DELETE /trainer/:id/team/:slot → delete Pokémon from a slot
 const deleteTrainerPokemon = async (req, res) => {
   console.log('DELETE route hit', req.method, req.params);
   const trainerId = req.params.id;
@@ -236,8 +194,6 @@ module.exports = {
   getTrainerDetailView,
   getNewTrainerForm,
   postNewTrainer,
-  getFilteredSpeciesFromCache,
-  getSpeciesFilterResults,
   getEditTrainerForm,
   handleUpdateTrainer,
   upsertTrainerPokemon,
