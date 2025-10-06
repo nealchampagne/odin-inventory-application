@@ -5,7 +5,6 @@ require('dotenv').config();
 const methodOverride = require('method-override');
 const fs = require('node:fs');
 const { capFirst } = require('./utils/strings');
-const populateDb = require('./db/populate-db');
 app.locals.capFirst = capFirst;
 
 // Ensure CA cert is available for secure DB connections
@@ -32,21 +31,6 @@ app.use(express.static(path.join(__dirname, 'public')));
 // use ejs view engine
 app.set('views', path.resolve('views/trainers'));
 app.set('view engine', 'ejs');
-
-// Database population
-app.post('/admin/seed-db', async (req, res) => {
-  const secret = req.headers['x-seed-secret'];
-  if (secret !== process.env.SEED_SECRET) {
-    return res.status(403).send('Forbidden');
-  }
-
-  res.send('🧪 Seeding started in background');
-
-  // Run seeding without blocking response
-  populateDb({ force: true }).catch(err => {
-    console.error('❌ Seeding failed:', err);
-  });
-});
 
 // Routes
 const trainerRouter = require('./routes/trainers');
