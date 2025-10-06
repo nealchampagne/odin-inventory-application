@@ -1,10 +1,19 @@
 (() => {
+
+  /** Hardcoded type-name list because I'm too lazy to rewrite the
+   *  db query to get names as well as IDs. **/
+  const types = [
+    'normal', 'fire', 'water', 'electric', 'grass', 'ice',
+    'fighting', 'poison', 'ground', 'flying', 'psychic', 'bug',
+    'rock', 'ghost', 'dragon', 'dark', 'steel', 'fairy'
+  ];
+
   const modal = document.getElementById('pokemonCreationModal');
   const closeBtn = document.getElementById('closeModalBtn');
   const speciesForm = document.getElementById('speciesFilterForm');
   const speciesResults = document.getElementById('speciesResults');
   const detailsForm = document.getElementById('pokemonDetailsForm');
-  const backBtn = document.getElementById('detailsBackBtn'); // you add a <button type="button">Back</button>
+  const backBtn = document.getElementById('detailsBackBtn');
 
   let draft = null; // holds slotIndex, speciesId, formId until final save
 
@@ -39,7 +48,7 @@
 
   let lastFocusedElement = null;
 
-
+  // Create new Pokémon in a slot
   window.startPokemonCreation = (slotIndex, opener) => {
     lastFocusedElement = opener || document.activeElement;
     draft = { slotIndex };
@@ -56,6 +65,7 @@
     loadSpeciesResults();
   };
 
+  // Edit existing Pokémon
   window.startPokemonEdit = (slotIndex, speciesId, formId) => {
     modal.dataset.mode = 'edit';
     modal.dataset.slot = slotIndex;
@@ -87,19 +97,22 @@
     if (focusable) focusable.focus({ preventScroll: true });
   };
 
+  // Load all species cards (unhide all)
   const loadSpeciesResults = () => {
     speciesResults.querySelectorAll('.species-card').forEach(card => {
       card.hidden = false;
     });
   };
   const trainerPageContent = document.getElementById('trainerPageContent');
-
+  
+  // Disable background interaction when modal is open
   const openModal = () => {
     trainerPageContent.inert = true;
     modal.classList.add('open');
     modal.setAttribute('aria-hidden', 'false');
   };
 
+  // Restore focus and re-enable background when modal is closed
   const closeModal = () => {
     if (lastFocusedElement) {
       lastFocusedElement.focus();
@@ -132,8 +145,9 @@
       const type2 = card.dataset.type2Id;
       const matchesType =
         !typeFilters.length ||
-        typeFilters.includes(type1) ||
-        (type2 && typeFilters.includes(type2));
+        typeFilters.length === 1 && (typeFilters.includes(type1) ||
+        (type2 && typeFilters.includes(type2))) ||
+        typeFilters.length === 2 && type2 && typeFilters.includes(type1) && typeFilters.includes(type2);
 
       const matchesGen =
         !genFilters.length || genFilters.includes(card.dataset.generation);
@@ -158,7 +172,24 @@
     document.getElementById('details-sprite').src = card.dataset.imageUrl || '';
     document.getElementById('details-name').textContent =
       capFirst(card.dataset.formName) || capFirst(card.dataset.speciesName) || '';
-  };
+    const type1El = modal.querySelector('#details-type1');
+      const type1Bubble = type1El.parentElement;
+      type1Bubble.className = `type-bubble ${types[(card.dataset.type1Id - 1)]}`;
+      const type2El = modal.querySelector('#details-type2');
+      const type2Bubble = type2El.parentElement;
+      if (card.dataset.type2Id) type2Bubble.className = `type-bubble ${types[(card.dataset.type2Id - 1)]}`;
+
+      type1El.src = `/images/types/${types[(card.dataset.type1Id -  1)]}.svg`;
+      type1El.alt = `${capFirst(types[(card.dataset.type1Id - 1)])} type`;
+
+      if (card.dataset.type2Id) {
+        type2El.src = `/images/types/${types[(card.dataset.type2Id - 1)]}.svg`;
+        type2El.alt = `${capFirst(types[(card.dataset.type2Id - 1)])} type`;
+        type2El.hidden = false;
+      } else {
+        type2El.hidden = true;
+      }
+   };
 
   /** Step 2: go back to species **/
   backBtn.addEventListener('click', () => {
