@@ -28,7 +28,6 @@ const createTables = async () => {
       form_name TEXT NOT NULL,
       type_1_id INTEGER REFERENCES types(id),
       type_2_id INTEGER REFERENCES types(id),
-      generation INT NOT NULL,
       image_url TEXT,
       UNIQUE (species_id, form_name)
     );
@@ -56,6 +55,7 @@ const createTables = async () => {
   `);
 };
 
+// Populate types table
 const insertType = async typeName => {
   typeName = typeName.toLowerCase();
 
@@ -66,6 +66,7 @@ const insertType = async typeName => {
   `, [typeName]);
 };
 
+// Retrieve type ID by name
 const getTypeId = async typeName => {
   typeName = typeName.toLowerCase();
 
@@ -81,6 +82,7 @@ const getTypeId = async typeName => {
   return result.rows[0].id;
 };
 
+// Populate pokemon_species table
 const insertPokemonSpecies = async ({ id, name, type1Id, type2Id, generation, imageUrl }) => {
   await pool.query(
     `INSERT INTO pokemon_species 
@@ -94,6 +96,7 @@ const insertPokemonSpecies = async ({ id, name, type1Id, type2Id, generation, im
   return id;
 }
 
+// Populate forms table
 const insertForm = async ({ speciesId, formName, type1Id, type2Id, imageUrl }) => {
   try {
     await pool.query(
@@ -109,6 +112,7 @@ const insertForm = async ({ speciesId, formName, type1Id, type2Id, imageUrl }) =
   }
 };
 
+// Populate natures table
 const insertNature = async name => {
   await pool.query(
     `INSERT INTO natures (name) VALUES ($1) ON CONFLICT DO NOTHING`,
@@ -116,6 +120,7 @@ const insertNature = async name => {
   );
 };
 
+// Retrieve all natures
 const getAllNatures = async () => {
   const result = await pool.query(
     `SELECT id, name FROM natures ORDER BY id`
@@ -123,6 +128,7 @@ const getAllNatures = async () => {
   return result.rows;
 };
 
+// Insert new trainer
 const insertTrainer = async ({ name, age, gender, bio }) => {
   await pool.query(
     `INSERT INTO trainers (name, age, gender, bio)
@@ -132,6 +138,7 @@ const insertTrainer = async ({ name, age, gender, bio }) => {
   );
 };
 
+// Retrieve all species (for dropdowns, etc.)
 const getAllSpecies = async () => {
   const result = await pool.query(
     'SELECT id, name, image_url, type_1_id, type_2_id, generation FROM pokemon_species ORDER BY id'
@@ -139,6 +146,7 @@ const getAllSpecies = async () => {
   return result.rows;
 };
 
+// Retrieve trainer by ID
 const getTrainerById = async trainerId => {
   const result = await pool.query(
     `SELECT id, name, age, gender, bio
@@ -149,15 +157,7 @@ const getTrainerById = async trainerId => {
   return result.rows[0] || null;
 };
 
-const getAllTrainers = async () => {
-  const result = await pool.query(
-    `SELECT id, name, age, gender, bio
-     FROM trainers
-     ORDER BY name`
-  );
-  return result.rows;
-};
-
+// Update trainer details
 const updateTrainer = async (trainerId, { name, age, gender, bio }) => {
   await pool.query(
     `UPDATE trainers
@@ -167,6 +167,7 @@ const updateTrainer = async (trainerId, { name, age, gender, bio }) => {
   );
 };
 
+// Insert or update a Pokémon in a trainer's slot
 const upsertTrainerPokemonSlot = async (
   trainerId,
   slot,
@@ -188,6 +189,7 @@ const upsertTrainerPokemonSlot = async (
   );
 };
 
+// Retrieve a trainer's full team
 const getTrainerTeam = async trainerId => {
   const result = await pool.query(
     `SELECT
@@ -222,14 +224,7 @@ const getTrainerTeam = async trainerId => {
   return result.rows;
 };
 
-const getTrainerDetail = async trainerId => {
-  const [trainer, team] = await Promise.all([
-    getTrainerById(trainerId),
-    getTrainerTeam(trainerId)
-  ]);
-  return { trainer, team };
-};
-
+// Retrieve all forms (for dropdowns, etc.)
 const getAllForms = async () => {
   const result = await pool.query(
     `SELECT species_id, form_name, type_1_id, type_2_id, image_url FROM forms ORDER BY id`
@@ -237,6 +232,7 @@ const getAllForms = async () => {
   return result.rows;
 }
 
+// Retrieve all trainers with names and a preview of their team
 const getAllTrainerPreviews = async () => {
   const result = await pool.query(
     `SELECT t.id AS trainer_id, t.name AS trainer_name,
@@ -274,6 +270,8 @@ const getAllTrainerPreviews = async () => {
   return Object.values(trainers);
 };
 
+
+// Delete a trainer and their associated Pokémon
 const deleteTrainer = async trainerId => {
   await pool.query(
     `DELETE FROM trainers
@@ -282,6 +280,7 @@ const deleteTrainer = async trainerId => {
   );
 };
 
+// Delete a Pokémon from a trainer's slot
 const deleteTrainerPokemonSlot = async (trainerId, slot) => {
   const { rows } = await pool.query(
     `DELETE FROM trainer_pokemon
@@ -291,22 +290,7 @@ const deleteTrainerPokemonSlot = async (trainerId, slot) => {
   return rows[0];
 };
 
-const getFilteredSpecies = async ({ typeIds = [], generationInts = [] }) => {
-  const result = await pool.query(
-    `SELECT id, name, image_url, type1_id, type2_id, generation
-     FROM species
-     WHERE (
-       $1::int[] IS NULL OR type1_id = ANY($1) OR type2_id = ANY($1)
-     ) AND (
-       $2::int[] IS NULL OR generation = ANY($2)
-     )
-     ORDER BY name`,
-    [typeIds.length ? typeIds : null, generationInts.length ? generationInts : null]
-  );
-
-  return result.rows;
-};
-
+// Retrieve all types (for dropdowns, etc.)
 const getAllTypes = async () => {
   const result = await pool.query(
     `SELECT id, name FROM types ORDER BY id`
@@ -314,6 +298,7 @@ const getAllTypes = async () => {
   return result.rows;
 };
 
+// Clear all data from tables (for repopulating)
 const truncateTables = async () => {
   await pool.query(`
     TRUNCATE TABLE 
@@ -342,11 +327,8 @@ module.exports = {
   deleteTrainerPokemonSlot,
   getAllTrainerPreviews,
   getAllSpecies,
-  getTrainerDetail,
   getTrainerById,
-  getAllTrainers,
   getTrainerTeam,
-  getFilteredSpecies,
   getAllTypes,
   getAllForms,
   getAllNatures,
