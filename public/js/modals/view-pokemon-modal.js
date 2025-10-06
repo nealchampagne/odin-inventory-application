@@ -63,7 +63,7 @@
     modal.setAttribute('aria-hidden', 'false');
 
     // Focus close button
-    const focusable = modal.querySelector('.modal-close');
+    const focusable = modal.querySelector('.close-btn');
     if (focusable) focusable.focus({ preventScroll: true });
   };
 
@@ -75,7 +75,7 @@
     modal.querySelectorAll('.type-bubble').forEach(bubble => {
       bubble.className = 'type-bubble';
     });
-
+    
     // Move focus back to opener or grid before hiding
     const opener = document.querySelector(
       `.slot-card[data-slot="${modal.dataset.lastSlotOpened}"]`
@@ -89,7 +89,7 @@
 
   // Bind close button
   document.addEventListener('DOMContentLoaded', () => {
-    const closeBtn = document.querySelector('#viewPokemonModal .modal-close');
+    const closeBtn = document.querySelector('#viewPokemonModal .close-btn');
     if (closeBtn) {
       closeBtn.addEventListener('click', window.closeViewModal);
     }
