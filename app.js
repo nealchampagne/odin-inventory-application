@@ -7,6 +7,10 @@ const fs = require('node:fs');
 const { capFirst } = require('./utils/strings');
 app.locals.capFirst = capFirst;
 
+// Ensure CA cert is available for secure DB connections
+const caCertPath = path.join(__dirname, 'temp-ca.pem');
+fs.writeFileSync(caCertPath, process.env.CA_CERT);
+
 // Middleware to parse JSON bodies
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
